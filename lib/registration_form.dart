@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vendorapp/Login/login_page.dart';
-import 'package:vendorapp/session/session_manager.dart';
+import 'package:vendorapp/models/vendor_models.dart';
+import 'package:vendorapp/services/vendor_service.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -104,23 +105,44 @@ final TextEditingController confirmpasswordController=TextEditingController();
                 mobileController.clear();
           }, child: Text('Clear')),
           SizedBox(width: 20,),
-          FilledButton(onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              await SessionManager.saveCreateAccountSession(
-                   userMobile: mobileController.text,
-                   password: passwordController.text,
-                   userFname: fnameController.text,
-                   userLname: lnameController.text,
-                   useremail: emailController.text,
-                );
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Account created! Details are ${fnameController.text} ${lnameController.text}, ${emailController.text}, ${mobileController.text}')),);
-                
-                 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginPage()));
-            }
-            
-          }, child: Text('Submit'))],)
+          FilledButton(
+  onPressed: () async {
+    if (_formKey.currentState!.validate()) {
+      // Check if email already exists
+      if (VendorService.emailExists(emailController.text.trim())) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email already registered')),
+        );
+        return;
+      }
+
+      // Save vendor to Hive
+      final vendor = VendorModel(
+        firstName: fnameController.text.trim(),
+        lastName: lnameController.text.trim(),
+        email: emailController.text.trim(),
+        mobile: mobileController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      await VendorService.addVendor(vendor);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account Successfully Created')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    }
+  },
+  child: const Text('Submit'),
+),
+],)
         ],)),
       ),
     )),);
