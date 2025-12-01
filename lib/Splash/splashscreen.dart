@@ -9,20 +9,20 @@ class Splashscreen extends StatefulWidget {
 }
 
 class _SplashscreenState extends State<Splashscreen> {
-@override
+  @override
   void initState() {
-    // TODO: implement initState
+    // implement initState
     super.initState();
     checkLoginStatus();
-    
   }
 
   Future<void> checkLoginStatus() async {
-    await Future.delayed(const Duration(seconds: 3)); 
+    await Future.delayed(const Duration(seconds: 3));
     bool isLoggedIn = await SessionManager.isLoggedIn();
 
     if (!mounted) return;
-
+    // Navigation logic can be added here if needed
+  }
 
   @override
   Widget build(BuildContext context) {
